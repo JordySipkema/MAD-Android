@@ -1,121 +1,97 @@
 package nl.jordysipkema.mad.contactcardapp;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import nl.jordysipkema.mad.contactcardapp.User.User;
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView firstNameLabel;
-    TextView lastNameLabel;
-    Button refreshButton;
-    ImageView profileImage;
+    private UserListPresenter presenter;
+    private ListView listView;
+    private List<User> users = new ArrayList<>();
+    private ArrayAdapter<User> userAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setupList();
 
-        firstNameLabel = (TextView) findViewById(R.id.lblUserFirstName);
-        lastNameLabel = (TextView) findViewById(R.id.lblUserLastName);
-        profileImage = (ImageView) findViewById(R.id.userProfileImage);
-        refreshButton = (Button) findViewById(R.id.refreshButton);
+        this.presenter = new UserListPresenter(this);
+        this.presenter.fetchUsers();
+    }
 
-        refreshButton.setOnClickListener(new View.OnClickListener() {
+    private void setupList(){
+        this.listView = (ListView) findViewById(R.id.userList);
+
+        this.userAdapter =
+                new ArrayAdapter<User>(this, 0, users) {
+                    @Override
+                    public View getView(int position, View convertView, ViewGroup parent) {
+                        // Inflate only once
+                        //android.R.layout.simple_list_item_2
+                        if (convertView == null) {
+                            convertView = LayoutInflater.from(getContext())
+                                    .inflate(android.R.layout.simple_list_item_2, parent, false);
+                        }
+
+                        User currentUser = users.get(position);
+
+                        // Lookup view for data population
+                        TextView title = (TextView) convertView.findViewById(android.R.id.text1);
+                        TextView description = (TextView) convertView.findViewById(android.R.id.text2);
+
+                        // Populate the data into the template view using the data object
+                        title.setText(currentUser.getName().getLast());
+                        description.setText(currentUser.getName().getFirst());
+
+                        // Return the completed view to render on screen
+                        return convertView;
+                    }
+                };
+
+        listView.setAdapter(this.userAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onClick(View view) {
-                getUserData();
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("SelectedItem: ", position + "");
+                showDetailView(position);
             }
         });
     }
 
-    private void getUserData() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "https://randomuser.me/api";
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Log.d("info", response);
-                        handleJsonResponse(response);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        //Show error?
-                        Log.e("Volley", error.toString());
-                    }
-                });
-
-        queue.add(stringRequest);
+    public void setUsers(final List<User> users){
+        Log.d("View", "setUsers: "+users.size());
+        this.users = users;
+        this.userAdapter.addAll(this.users);
+        this.userAdapter.notifyDataSetChanged();
     }
 
-    private void handleJsonResponse(String json_string){
-        try {
-            JSONObject jObject = new JSONObject(json_string);
+    public void showDetailView(int user_id){
+        User user = this.users.get(user_id);
+        Gson gson = new Gson();
+        Intent i = new Intent(getApplicationContext(), DetailActivity.class);
+        i.putExtra("USER", gson.toJson(user));
 
-            JSONArray results = jObject.getJSONArray("results");
-            JSONObject person = results.getJSONObject(0);
-            JSONObject person_name = person.getJSONObject("name");
-            JSONObject person_picture = person.getJSONObject("picture");
-
-            String lastName = person_name.getString("last");
-            String firstName = person_name.getString("first");
-            String image_url = person_picture.getString("large");
-
-
-            firstNameLabel.setText(firstName);
-            lastNameLabel.setText(lastName);
-
-            new DownloadImageTask(profileImage).execute(image_url);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        startActivity(i);
     }
-    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
 
-        public DownloadImageTask(ImageView bmImage) {
-            this.bmImage = bmImage;
-        }
 
-        protected Bitmap doInBackground(String... urls) {
-            String urldisplay = urls[0];
-            Bitmap mIcon11 = null;
-            try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                Log.e("Error", e.getMessage());
-                e.printStackTrace();
-            }
-            return mIcon11;
-        }
 
-        protected void onPostExecute(Bitmap result) {
-            bmImage.setImageBitmap(result);
-        }
-    }
+
 }

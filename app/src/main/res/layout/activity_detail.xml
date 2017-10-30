@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="nl.jordysipkema.mad.contactcardapp.DetailActivity">
+
+    <ImageView
+        android:id="@+id/cloudBgImage"
+        android:layout_width="0dp"
+        android:layout_height="175dp"
+        android:adjustViewBounds="false"
+        android:cropToPadding="false"
+        android:scaleType="center"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/clouds" />
+
+    <ImageView
+        android:id="@+id/userProfileImage"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="75dp"
+        app:layout_constraintLeft_toRightOf="@+id/cloudBgImage"
+        app:layout_constraintRight_toLeftOf="@+id/cloudBgImage"
+        app:layout_constraintTop_toTopOf="@+id/cloudBgImage"
+        app:srcCompat="@drawable/avatarplaceholder" />
+
+    <TextView
+        android:id="@+id/lblUserLastName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/lastName_placeholder"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/userProfileImage" />
+
+    <TextView
+        android:id="@+id/lblUserFirstName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/firstName_placeholder"
+        android:textAlignment="center"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lblUserLastName" />
+
+</android.support.constraint.ConstraintLayout>
