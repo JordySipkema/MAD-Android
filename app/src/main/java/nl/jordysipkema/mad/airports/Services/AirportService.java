@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Locale;
 
 import nl.jordysipkema.mad.airports.Contracts.AirportReaderContract;
+import nl.jordysipkema.mad.airports.Models.Airport;
 
 public class AirportService extends SQLiteAssetHelper {
 
@@ -20,6 +21,15 @@ public class AirportService extends SQLiteAssetHelper {
 
     public AirportService(Context context){
         super(context, DB_NAME, null, DB_VERSION);
+    }
+
+    public Airport getAirport(String icao){
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor c = db.rawQuery(String.format("Select * from airports WHERE %s = '%s'",
+                AirportReaderContract.AirportEntry.COLUMN_NAME_ICAO, icao), null);
+        c.moveToFirst();
+        return new Airport(c);
     }
 
     public Cursor getAirports(){
@@ -32,10 +42,23 @@ public class AirportService extends SQLiteAssetHelper {
     public Cursor getCountries(){
         SQLiteDatabase db = getReadableDatabase();
 
-        String select = "rowid _id " + AirportReaderContract.AirportEntry.COLUMN_NAME_COUNTRY;
-        String groupBy = AirportReaderContract.AirportEntry.COLUMN_NAME_NAME
+        String select = "rowid _id, " + AirportReaderContract.AirportEntry.COLUMN_NAME_COUNTRY;
+        String groupBy = AirportReaderContract.AirportEntry.COLUMN_NAME_COUNTRY;
+        String orderBy = AirportReaderContract.AirportEntry.COLUMN_NAME_COUNTRY + " ASC";
 
-        String query = "SELECT %s FROM airports WHERe";
+        String query = String.format("SELECT %s FROM airports GROUP BY %s ORDER BY %s",
+                select, groupBy, orderBy);
+        return db.rawQuery(query, null);
+    }
+
+    public Cursor getAirportsWhereCountryCode(String country_code) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        String where = String.format("%s = '%s'",
+                AirportReaderContract.AirportEntry.COLUMN_NAME_COUNTRY, country_code);
+
+        String query = String.format("SELECT rowid _id, * FROM airports WHERE %s ORDER BY %s",
+                where, AirportReaderContract.AirportEntry.COLUMN_NAME_NAME);
         return db.rawQuery(query, null);
     }
 }

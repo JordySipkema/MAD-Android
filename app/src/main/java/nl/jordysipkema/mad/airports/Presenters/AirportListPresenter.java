@@ -21,4 +21,12 @@ public class AirportListPresenter {
     public Cursor getAirports(){
         return this.airportService.getAirports();
     }
+
+    public Cursor getAirportsByCountryCode(String countrycode){
+        return this.airportService.getAirportsWhereCountryCode(countrycode);
+    }
+
+    public Cursor getAvailableCountries() {
+        return this.airportService.getCountries();
+    }
 }
